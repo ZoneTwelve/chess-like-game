@@ -38,7 +38,8 @@ void board(){
 
 public class Piece{
   int bx, by;
-  float x, y, size, block;
+  float x, y, px, py, // [x, y](currect), [px, py](previous)  
+        size, block;  // piece size, block size
   String name;
   boolean follow, drag;
   Piece(int _x, int _y, String _name){
@@ -47,6 +48,8 @@ public class Piece{
     size = block/3*2;
     x = _x * size + block/2;
     y = _y * size + block/2;
+    px = -1;
+    py = -1;
     bx = int( x / block );
     by = int( y / block );
     follow = false;
@@ -66,7 +69,6 @@ public class Piece{
     p = false;
     int rx = int( tx / block ),
         ry = int( ty / block );
-    println( rx, ry );
     if( rx > 0 && rx <= 9 && ry > 0 && ry <= 11 ){
       x = (rx + 1) * block - block/2;
       y = (ry + 1) * block - block/2;
@@ -89,20 +91,39 @@ public class Piece{
    }
   
   public void control( float tx, float ty, boolean _drag ){
-    if( _drag && sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty)) <= size/2 ){
-       follow = true;
+    if( !follow && _drag && sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty)) <= size/2 ){
+      px = x;
+      py = y;
+      follow = true;
     }else if( !_drag && follow ){
-      println( bx, by, tx, ty );
       follow = false;
-      if ( int( ty / block ) == 6 )
-        place( bx, by );
-      else
+      if ( !moving_rule( int(tx), int(ty) ) || int( ty / block ) == 6 ){
+        place( px, py );
+      }else{
         place( tx, ty );
+      }
     }
     
     if( follow ){
       x = tx;
       y = ty;
     }
+  }
+  
+  public boolean moving_rule( int tx, int ty ){
+    boolean result = false;
+    int bx  = int(px/block) , // input base position 
+        by  = int(py/block) ,
+        tbx = int(tx/block) ,
+        tby = int(ty/block) ; // block based
+    switch( name ){
+      case "王":
+        //print("Pos: ");
+        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1);
+        if( abs(tbx-bx) <= 1 && ( abs(tby-by) <=1 || (tby==5 && by==7) || (tby==7 && by==5) ) )
+          result = true;
+      break;
+    }
+    return result;
   }
 };
