@@ -31,7 +31,7 @@ void setup(){
 }
 
 Piece set_piece( String name, int x, int y ){
-  Piece p = new Piece( x, y, name  );
+  Piece p = new Piece( x, y, name );
   p.place( int(x*2/3 + 1/2), int(y*2/3 + 1/2) );
   return p;
 }
@@ -71,7 +71,7 @@ public class Piece{
   float x, y, px, py, // [x, y](currect), [px, py](previous)  
         size, block;  // piece size, block size
   String name;
-  boolean follow, drag;
+  boolean follow = false, drag = false, hover = false, lock = false;
   Piece(int _x, int _y, String _name){
     name = _name;
     block = 50;
@@ -82,14 +82,12 @@ public class Piece{
     py = -1;
     bx = int( x / block );
     by = int( y / block );
-    follow = false;
-    drag   = false;
     step = 0;
   }
   
   public void draw(){
     fill( 255 );
-    stroke( follow ? color( 255, 0, 0 ) : color( 0 ) );
+    stroke( follow ? color( 255, 0, 0 ) : hover ? color( 250, 100, 100 ) : color( 0 ) );
     circle( x, y, size );
     fill( 0 );
     textSize( 16 );
@@ -114,11 +112,14 @@ public class Piece{
   }
   
   public void control( float tx, float ty, boolean _drag ){
-    if( !follow && _drag && sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty)) <= size/2 ){
+    if( !_drag )
+      hover = sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty)) <= size/2;
+
+    if( !follow && _drag && hover ){
       px = x;
       py = y;
       follow = true;
-    }else if( !_drag && follow ){
+    }else if( !_drag && follow && hover ){
       follow = false;
       if ( !moving_rule( int(tx), int(ty) ) || int( ty / block ) == 6 ){
         place( px, py );
@@ -145,6 +146,7 @@ public class Piece{
         //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
         if( abs(tbx-bx) <= 1 && ( abs(tby-by) <= 1 || (tby==5 && by==7) || (tby==7 && by==5) ) )
           result = true;
+      break;
       case "金":
         //print("Pos: ");
         //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
