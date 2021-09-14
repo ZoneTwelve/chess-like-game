@@ -1,26 +1,48 @@
 Piece[] piece;
 PFont myFont;
-int a = 5;
+String[] p_name = new String[7];
+// 王: 8,2 ; 8,17
+// 金: 7/9,2 ; 7/9,17
+// 木: 5,16 11,17 ; 
+// 土: 5,17 11,16 ; 
+// 水 2/12,17
+// 火: 4/
+int a = 8;
+int b = 17;
 boolean p = false;
 void setup(){
   size( 550, 650 );
   
-  piece = new Piece[10];
-  piece[0] = new Piece( a, a, "王" );
-  piece[0].place( int(a*2/3 + 1/2), int(a*2/3 + 1/2) );
+  piece = new Piece[32];
+  piece[0] = set_piece( "王", 8, 17 );
+  piece[1] = set_piece( "王", 8, 2  );
+  piece[2] = set_piece( "金", 7, 17 );
   myFont = createFont("標楷體",100);
   textFont(myFont);
   //noLoop();
 }
 
-void draw(){
-  background( 255 );
-  Piece p = piece[0];
-  
-  board();
-  p.start_move();
+Piece set_piece( String name, int x, int y ){
+  Piece p = new Piece( x, y, name  );
+  p.place( int(x*2/3 + 1/2), int(y*2/3 + 1/2) );
+  return p;
+}
+
+void move_control_draw( Piece p ){
   p.control( mouseX, mouseY, mousePressed );
   p.draw();
+}
+
+void draw(){
+  background( 255 );
+  
+  board();
+
+  move_control_draw( piece[0] );
+  move_control_draw( piece[1] );
+  move_control_draw( piece[2] );
+  
+  
 }
 
 void board(){
@@ -37,7 +59,7 @@ void board(){
 }
 
 public class Piece{
-  int bx, by;
+  int bx, by, step;
   float x, y, px, py, // [x, y](currect), [px, py](previous)  
         size, block;  // piece size, block size
   String name;
@@ -54,6 +76,7 @@ public class Piece{
     by = int( y / block );
     follow = false;
     drag   = false;
+    step = 0;
   }
   
   public void draw(){
@@ -81,14 +104,6 @@ public class Piece{
       y = (ry + 1) * block - block/2;
     }
   }
-  
-  public void start_move(){
-    if ( p == false ){
-       p = true;
-       bx = int(x / block);
-       by = int(y / block);
-    }
-   }
   
   public void control( float tx, float ty, boolean _drag ){
     if( !follow && _drag && sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty)) <= size/2 ){
@@ -118,12 +133,26 @@ public class Piece{
         tby = int(ty/block) ; // block based
     switch( name ){
       case "王":
-        //print("Pos: ");
-        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1);
-        if( abs(tbx-bx) <= 1 && ( abs(tby-by) <=1 || (tby==5 && by==7) || (tby==7 && by==5) ) )
+        print("Pos: ");
+        println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
+        if( abs(tbx-bx) <= 1 && ( abs(tby-by) <= 1 || (tby==5 && by==7) || (tby==7 && by==5) ) )
           result = true;
+      case "金":
+        print("Pos: ");
+        println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
+        if( step == 0 ){
+           if( ( abs(tbx-bx) <= 3 && tby-by==0 ) || ( abs(tby-by) <= 3 && tbx-bx==0 ) ) 
+             result = true;
+        }
+        else{
+          if( ( abs(tbx-bx) <= 2 && tby-by==0 ) || ( abs(tby-by) <= 2 && tbx-bx==0 ) ||  ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5) )) )
+            result = true;
+        }
+        
       break;
     }
+    if( result == true )
+      step ++;
     return result;
   }
 };
