@@ -1,6 +1,9 @@
 Piece[] piece;
 PFont myFont;
-String[] p_name = new String[7];
+String[] p_name = {"王", "金"};
+int king_start[][] = { {8, 2} , {8, 17} };
+int gold_start[][] = { {7, 2} , {7, 17} ,  {9, 2} , {9, 17} };
+int piece_start[][][] = { king_start, gold_start };
 // 王: 8,2 ; 8,17
 // 金: 7/9,2 ; 7/9,17
 // 木: 5,16 11,17 ; 
@@ -12,11 +15,16 @@ int b = 17;
 boolean p = false;
 void setup(){
   size( 550, 650 );
+  // add piece loop
+  piece = new Piece[6];
+  int index = 0;
+  for( int i = 0; i < piece_start.length; i++ ){
+    for( int j = 0; j <  piece_start[i].length; j++){
+      piece[index] = set_piece( p_name[i], piece_start[i][j][0], piece_start[i][j][1] );
+      index++;
+    }
+  }
   
-  piece = new Piece[32];
-  piece[0] = set_piece( "王", 8, 17 );
-  piece[1] = set_piece( "王", 8, 2  );
-  piece[2] = set_piece( "金", 7, 17 );
   myFont = createFont("標楷體",100);
   textFont(myFont);
   //noLoop();
@@ -38,9 +46,9 @@ void draw(){
   
   board();
 
-  move_control_draw( piece[0] );
-  move_control_draw( piece[1] );
-  move_control_draw( piece[2] );
+  for( int i = 0; i < piece.length; i++ ){
+    move_control_draw( piece[i] ); 
+  }
   
   
 }
@@ -133,13 +141,13 @@ public class Piece{
         tby = int(ty/block) ; // block based
     switch( name ){
       case "王":
-        print("Pos: ");
-        println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
+        //print("Pos: ");
+        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
         if( abs(tbx-bx) <= 1 && ( abs(tby-by) <= 1 || (tby==5 && by==7) || (tby==7 && by==5) ) )
           result = true;
       case "金":
-        print("Pos: ");
-        println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
+        //print("Pos: ");
+        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
         if( step == 0 ){
            if( ( abs(tbx-bx) <= 3 && tby-by==0 ) || ( abs(tby-by) <= 3 && tbx-bx==0 ) ) 
              result = true;
