@@ -154,8 +154,8 @@ public class Piece{
           result = true;
       break;
       case "金":
-        print("Pos: ");
-        println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
+        //print("Pos: ");
+        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
         if( step == 0 ){
            if( ( abs(tbx-bx) <= 3 && tby-by==0 ) || ( abs(tby-by) <= 3 && tbx-bx==0 ) ) 
              result = true;
@@ -191,8 +191,9 @@ public class Piece{
         if( step==0 || step==1 ){  //before cross river
           if( tbx-bx==0 && ( tby-by==1 || ( tby==5 && by==7 ) || ( tby==7 && by==5 ) ) ){
             result = true;
+          }
         }
-        else{  //after cross river, [bug] compile error(?)
+        else{  //after cross river
           if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) ) ){
             result = true;
           }
