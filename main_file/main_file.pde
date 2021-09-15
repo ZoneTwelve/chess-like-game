@@ -1,14 +1,15 @@
 Piece[] piece;
 PFont myFont;
-String[] p_name = {"王", "金", "木", "土", "水", "火", "卒"};
+String[] p_name = {"王", "金", "木", "土", "水", "火", "卒", "士"};
 int king_start[][] = { {8, 2} , {8, 17} };
 int gold_start[][] = { {7, 2} , {7, 17} ,  {9, 2} , {9, 17} };
 int wood_start[][] = { {5, 2} , {5, 16} ,  {11, 3} , {11, 17} };
 int earth_start[][] = { {5, 3} , {5, 17} ,  {11, 2} , {11, 16} };
 int water_start[][] =  { {2, 2} , {3, 17} ,  {12, 2} , {14, 17} };
 int fire_start[][] =  { {3, 2} , {2, 17} ,  {14, 2} , {12, 17} };
-int solder_start[][] =  { {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} , {2, 12} , {5, 12} , {8, 12} , {11, 12} , {14, 12} };
-int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, water_start, fire_start, solder_start};
+int up_solder_start[][] =  { {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} };
+int down_solder_start[][] = {  {2, 12} , {5, 12} , {8, 12} , {11, 12} , {14, 12} };
+int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, water_start, fire_start, up_solder_start, down_solder_start};
 // 王: 8,2 ; 8,17
 // 金: 7/9,2 ; 7/9,17
 // 木: 5,16 11,17 ; 
@@ -43,6 +44,14 @@ Piece set_piece( String name, int x, int y ){
 }
 
 void move_control_draw( Piece p ){
+  //if( mousePressed ){
+  //  if( mouseButton == LEFT ){
+  //    p.control( mouseX, mouseY, mousePressed );
+  //  }
+  //  else{
+  //    p.attack();
+  //  }
+  //}
   p.control( mouseX, mouseY, mousePressed );
   p.draw();
 }
@@ -118,6 +127,7 @@ public class Piece{
   }
   
   public void control( float tx, float ty, boolean _drag ){
+    println( mouseButton );
     if( !_drag )
       hover = sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty)) <= size/2;
 
@@ -138,6 +148,10 @@ public class Piece{
       x = tx;
       y = ty;
     }
+  }
+  
+  public void attack(){
+    
   }
   
   public boolean moving_rule( int tx, int ty ){
@@ -190,6 +204,18 @@ public class Piece{
       case "卒":
         if( step==0 || step==1 ){  //before cross river
           if( tbx-bx==0 && ( tby-by==1 || ( tby==5 && by==7 ) || ( tby==7 && by==5 ) ) ){
+            result = true;
+          }
+        }
+        else{  //after cross river
+          if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) ) ){
+            result = true;
+          }
+        }
+      break;
+      case "士":
+        if( step==0 || step==1 ){  //before cross river
+          if( tbx-bx==0 && ( tby-by==-1 || ( tby==5 && by==7 ) || ( tby==7 && by==5 ) ) ){
             result = true;
           }
         }
