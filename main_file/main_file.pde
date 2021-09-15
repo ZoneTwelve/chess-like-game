@@ -1,9 +1,13 @@
 Piece[] piece;
 PFont myFont;
-String[] p_name = {"王", "金"};
+String[] p_name = {"王", "金", "木", "土", "水", "火"};
 int king_start[][] = { {8, 2} , {8, 17} };
 int gold_start[][] = { {7, 2} , {7, 17} ,  {9, 2} , {9, 17} };
-int piece_start[][][] = { king_start, gold_start };
+int wood_start[][] = { {5, 2} , {5, 16} ,  {11, 3} , {11, 17} };
+int earth_start[][] = { {5, 3} , {5, 17} ,  {11, 2} , {11, 16} };
+int water_start[][] =  { {2, 2} , {3, 17} ,  {12, 2} , {14, 17} };
+int fire_start[][] =  { {3, 2} , {2, 17} ,  {14, 2} , {12, 17} };
+int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, water_start, fire_start};
 // 王: 8,2 ; 8,17
 // 金: 7/9,2 ; 7/9,17
 // 木: 5,16 11,17 ; 
@@ -16,7 +20,7 @@ boolean p = false;
 void setup(){
   size( 550, 650 );
   // add piece loop
-  piece = new Piece[6];
+  piece = new Piece[22];
   int index = 0;
   for( int i = 0; i < piece_start.length; i++ ){
     for( int j = 0; j <  piece_start[i].length; j++){
@@ -71,7 +75,7 @@ public class Piece{
   float x, y, px, py, // [x, y](currect), [px, py](previous)  
         size, block;  // piece size, block size
   String name;
-  boolean follow = false, drag = false, hover = false, lock = false;
+  boolean follow = false, drag = false, hover = false;
   Piece(int _x, int _y, String _name){
     name = _name;
     block = 50;
@@ -158,7 +162,28 @@ public class Piece{
           if( ( abs(tbx-bx) <= 2 && tby-by==0 ) || ( abs(tby-by) <= 2 && tbx-bx==0 ) ||  ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5) )) )
             result = true;
         }
-        
+      break;
+      case "木":
+        if( ( abs(tbx-bx)==1 && abs(tby-by)==1 ) || ( abs(tbx-bx)==1 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) ) ){
+          result = true;
+        }
+        //print("Pos: ");
+        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, bx, by, tbx, tby, result);
+      break;
+      case "土":
+        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+          result = true;
+        }
+      break;
+      case "水":
+        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+          result = true;
+        }
+      break;
+      case "火":
+        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+          result = true;
+        }
       break;
     }
     if( result == true )
