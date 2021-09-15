@@ -7,7 +7,7 @@ int wood_start[][] = { {5, 2} , {5, 16} ,  {11, 3} , {11, 17} };
 int earth_start[][] = { {5, 3} , {5, 17} ,  {11, 2} , {11, 16} };
 int water_start[][] =  { {2, 2} , {3, 17} ,  {12, 2} , {14, 17} };
 int fire_start[][] =  { {3, 2} , {2, 17} ,  {14, 2} , {12, 17} };
-int solder_start[][] =  { {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} , {2, 12} , {5, 12} , {8, 12} , {11, 12}, {14, 12} };
+int solder_start[][] =  { {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} , {2, 12} , {5, 12} , {8, 12} , {11, 12} , {14, 12} };
 int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, water_start, fire_start, solder_start};
 // 王: 8,2 ; 8,17
 // 金: 7/9,2 ; 7/9,17
@@ -173,26 +173,27 @@ public class Piece{
         //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, bx, by, tbx, tby, result);
       break;
       case "土":
-        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
           result = true;
         }
       break;
       case "水":
-        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
           result = true;
         }
       break;
       case "火":
-        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+        if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
           result = true;
         }
       break;
-      case"卒":
+      case "卒":
         if( step==0 || step==1 ){  //before cross river
-          
+          if( tbx-bx==0 && ( tby-by==1 || ( tby==5 && by==7 ) || ( tby==7 && by==5 ) ) ){
+            result = true;
         }
-        else{
-          if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+        else{  //after cross river, [bug] compile error(?)
+          if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) ) ){
             result = true;
           }
         }
