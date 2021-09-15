@@ -1,26 +1,28 @@
 Piece[] piece;
 PFont myFont;
-String[] p_name = {"王", "金", "木", "土", "水", "火"};
+String[] p_name = {"王", "金", "木", "土", "水", "火", "卒"};
 int king_start[][] = { {8, 2} , {8, 17} };
 int gold_start[][] = { {7, 2} , {7, 17} ,  {9, 2} , {9, 17} };
 int wood_start[][] = { {5, 2} , {5, 16} ,  {11, 3} , {11, 17} };
 int earth_start[][] = { {5, 3} , {5, 17} ,  {11, 2} , {11, 16} };
 int water_start[][] =  { {2, 2} , {3, 17} ,  {12, 2} , {14, 17} };
 int fire_start[][] =  { {3, 2} , {2, 17} ,  {14, 2} , {12, 17} };
-int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, water_start, fire_start};
+int solder_start[][] =  { {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} , {2, 12} , {5, 12} , {8, 12} , {11, 12}, {14, 12} };
+int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, water_start, fire_start, solder_start};
 // 王: 8,2 ; 8,17
 // 金: 7/9,2 ; 7/9,17
 // 木: 5,16 11,17 ; 
 // 土: 5,17 11,16 ; 
 // 水 2/12,17
 // 火: 4/
+// 卒: 
 int a = 8;
 int b = 17;
 boolean p = false;
 void setup(){
   size( 550, 650 );
   // add piece loop
-  piece = new Piece[22];
+  piece = new Piece[32];
   int index = 0;
   for( int i = 0; i < piece_start.length; i++ ){
     for( int j = 0; j <  piece_start[i].length; j++){
@@ -152,8 +154,8 @@ public class Piece{
           result = true;
       break;
       case "金":
-        //print("Pos: ");
-        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
+        print("Pos: ");
+        println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
         if( step == 0 ){
            if( ( abs(tbx-bx) <= 3 && tby-by==0 ) || ( abs(tby-by) <= 3 && tbx-bx==0 ) ) 
              result = true;
@@ -183,6 +185,16 @@ public class Piece{
       case "火":
         if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
           result = true;
+        }
+      break;
+      case"卒":
+        if( step==0 || step==1 ){  //before cross river
+          
+        }
+        else{
+          if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( abs(tbx-bx)==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
+            result = true;
+          }
         }
       break;
     }
