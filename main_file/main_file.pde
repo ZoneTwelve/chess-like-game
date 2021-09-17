@@ -1,15 +1,10 @@
 Piece[] piece;
 PFont myFont;
 String[] p_name = {"王", "金", "木", "土", "水", "火", "卒", "士"};
-int king_start[][] = { {8, 2} , {8, 17} };
-int gold_start[][] = { {7, 2} , {7, 17} ,  {9, 2} , {9, 17} };
-int wood_start[][] = { {5, 2} , {5, 16} ,  {11, 3} , {11, 17} };
-int earth_start[][] = { {5, 3} , {5, 17} ,  {11, 2} , {11, 16} };
-int water_start[][] =  { {2, 2} , {3, 17} ,  {12, 2} , {14, 17} };
-int fire_start[][] =  { {3, 2} , {2, 17} ,  {14, 2} , {12, 17} };
-int up_solder_start[][] =  { {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} };
-int down_solder_start[][] = {  {2, 12} , {5, 12} , {8, 12} , {11, 12} , {14, 12} };
-int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, water_start, fire_start, up_solder_start, down_solder_start};
+int team1_start[][] = { {8, 2} , {7, 2} , {9, 2} , {5, 2} , {11, 3} , {5, 3} , {11, 2} , {2, 2} , {12, 2} , {3, 2} , {14, 2} , {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} };
+int team2_start[][] = { {8, 17} ,  {7, 17} , {9, 17} , {5, 16} , {11, 17} , {5, 17} , {11, 16} , {3, 17} , {14, 17} , {2, 17} , {12, 17} , {2, 12} , {5, 12} , {8, 12} , {11, 12} , {14, 12}};
+int piece_start[][][] = { team1_start, team2_start };
+int board[][] = new int[9][11];
 // 王: 8,2 ; 8,17
 // 金: 7/9,2 ; 7/9,17
 // 木: 5,16 11,17 ; 
@@ -17,58 +12,94 @@ int piece_start[][][] = { king_start, gold_start , wood_start, earth_start, wate
 // 水 2/12,17
 // 火: 4/
 // 卒: 
-int a = 8;
-int b = 17;
 boolean p = false;
+final int block = 50;
 void setup(){
   size( 550, 650 );
+  
+  // init board[][]
+  for(int a=0; a<9; a++){
+    for(int b=0; b<11; b++){
+      board[a][b] = -1;
+    }
+  }
+  
   // add piece loop
   piece = new Piece[32];
   int index = 0;
   for( int i = 0; i < piece_start.length; i++ ){
+    int n = 0, s = 0;
     for( int j = 0; j <  piece_start[i].length; j++){
-      piece[index] = set_piece( p_name[i], piece_start[i][j][0], piece_start[i][j][1] );
+      board[ int(piece_start[i][j][0]*2/3 + 1/2) - 1][ int(piece_start[i][j][1]*2/3 + 1/2) - 1 ] = index;
+      if( j == 0 ){
+        piece[index] = set_piece( p_name[n], piece_start[i][j][0], piece_start[i][j][1] , i+1, index);
+      }
+      else if( j < 11 ){
+        s += 1;
+        if( s == 2 ){
+          s = 0;
+        }
+        piece[index] = set_piece( p_name[n+s], piece_start[i][j][0], piece_start[i][j][1] , i+1, index);
+        n = n + s;
+      }
+      else{
+        piece[index] = set_piece( p_name[n+i+1], piece_start[i][j][0], piece_start[i][j][1] , i+1, index);
+      }
       index++;
     }
   }
+  
+
   
   myFont = createFont("標楷體",100);
   textFont(myFont);
   //noLoop();
 }
 
-Piece set_piece( String name, int x, int y ){
-  Piece p = new Piece( x, y, name );
+Piece set_piece( String name, int x, int y, int team , int index){
+  Piece p = new Piece( x, y, name, team, index );
   p.place( int(x*2/3 + 1/2), int(y*2/3 + 1/2) );
   return p;
-}
-
-void move_control_draw( Piece p ){
-  //if( mousePressed ){
-  //  if( mouseButton == LEFT ){
-  //    p.control( mouseX, mouseY, mousePressed );
-  //  }
-  //  else{
-  //    p.attack();
-  //  }
-  //}
-  p.control( mouseX, mouseY, mousePressed );
-  p.draw();
 }
 
 void draw(){
   background( 255 );
   
-  board();
+  draw_board();
 
   for( int i = 0; i < piece.length; i++ ){
-    move_control_draw( piece[i] ); 
+    Piece p = piece[ i ]; 
+    int rx = int( mouseX / block ), ry = int( mouseY / block );
+    int pindex = -1;
+
+    Piece tmp_p = null;
+    if( rx > 0 && rx <= 9 && ry > 0 && ry <= 11 ){
+      pindex = board[ rx - 1 ][ ry - 1 ];
+    }
+
+    if( pindex > -1 ){
+      tmp_p = piece[ pindex ];
+    }
+    
+    int prx = int( p.x / block ), pry = int( p.y / block );
+    int pprx = int( p.px / block ), ppry = int( p.py / block );
+    boolean pfollow = p.follow==true;
+    p.control( mouseX, mouseY, mousePressed, pindex == i ? null : tmp_p );
+
+    if( !mousePressed && pfollow && p.hover ){
+      println( prx, pry, pprx, ppry);
+      board[ prx - 1 ][ pry - 1 ] ^= board[ pprx - 1 ][ ppry - 1 ];
+      board[ pprx - 1 ][ ppry - 1 ] ^= board[ prx - 1 ][ pry - 1 ];
+      board[ prx - 1 ][ pry - 1 ] ^= board[ pprx - 1 ][ ppry - 1 ];
+    }
+    
+    p.draw();
   }
   
   
 }
 
-void board(){
+void draw_board(){
   int size = 50;
   stroke( 0 );
   for( int y = 1 ; y <= 11 ; y++ ){
@@ -82,22 +113,23 @@ void board(){
 }
 
 public class Piece{
-  int bx, by, step;
+  int step;
+  int team, id;
   float x, y, px, py, // [x, y](currect), [px, py](previous)  
-        size, block;  // piece size, block size
+        size;  // piece size, block size
   String name;
   boolean follow = false, drag = false, hover = false;
-  Piece(int _x, int _y, String _name){
+  Piece(int _x, int _y, String _name, int _team, int _id){
     name = _name;
-    block = 50;
+    //block = 50;
     size = block/3*2;
     x = _x * size + block/2;
     y = _y * size + block/2;
     px = -1;
     py = -1;
-    bx = int( x / block );
-    by = int( y / block );
     step = 0;
+    team = _team;
+    id = _id;
   }
   
   public void draw(){
@@ -110,7 +142,7 @@ public class Piece{
   }
   
   public void place( float tx, float ty ){
-    p = false;
+    //p = false;
     int rx = int( tx / block ),
         ry = int( ty / block );
     if( rx > 0 && rx <= 9 && ry > 0 && ry <= 11 ){
@@ -119,15 +151,14 @@ public class Piece{
     }
   }  
   public void place( int rx, int ry ){
-    p = false;
+    //p = false;
     if( rx > 0 && rx <= 9 && ry > 0 && ry <= 11 ){
       x = (rx + 1) * block - block/2;
       y = (ry + 1) * block - block/2;
     }
   }
   
-  public void control( float tx, float ty, boolean _drag ){
-    println( mouseButton );
+  public void control( float tx, float ty, boolean _drag, Piece tp ){
     if( !_drag )
       hover = sqrt((x-tx)*(x-tx) + (y-ty)*(y-ty)) <= size/2;
 
@@ -137,7 +168,8 @@ public class Piece{
       follow = true;
     }else if( !_drag && follow && hover ){
       follow = false;
-      if ( !moving_rule( int(tx), int(ty) ) || int( ty / block ) == 6 ){
+      println( tp ); // target piece
+      if ( (!moving_rule( int(tx), int(ty) ) || int( ty / block ) == 6) || tp != null ){
         place( px, py );
       }else{
         place( tx, ty );
@@ -160,16 +192,14 @@ public class Piece{
         by  = int(py/block) ,
         tbx = int(tx/block) ,
         tby = int(ty/block) ; // block based
+        
+       
     switch( name ){
       case "王":
-        //print("Pos: ");
-        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
         if( abs(tbx-bx) <= 1 && ( abs(tby-by) <= 1 || (tby==5 && by==7) || (tby==7 && by==5) ) )
           result = true;
       break;
       case "金":
-        //print("Pos: ");
-        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, tbx, tby, bx, by);
         if( step == 0 ){
            if( ( abs(tbx-bx) <= 3 && tby-by==0 ) || ( abs(tby-by) <= 3 && tbx-bx==0 ) ) 
              result = true;
@@ -183,8 +213,6 @@ public class Piece{
         if( ( abs(tbx-bx)==1 && abs(tby-by)==1 ) || ( abs(tbx-bx)==1 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) ) ){
           result = true;
         }
-        //print("Pos: ");
-        //println(abs(tbx-bx), abs(tby-by), abs(tbx-bx) <= 1 && abs(tbx-bx) <=1, bx, by, tbx, tby, result);
       break;
       case "土":
         if( (abs(tbx-bx)==1 && tby-by==0) || (tbx-bx==0 && abs(tby-by)==1)  || ( tbx-bx==0 && ( (tby==5 && by==7) || (tby==7 && by==5)  ) )){
@@ -228,6 +256,7 @@ public class Piece{
     }
     if( result == true )
       step ++;
+
     return result;
   }
 };
