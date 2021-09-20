@@ -3,6 +3,8 @@ PFont myFont;
 String[] p_name = {"王", "金", "木", "土", "水", "火", "卒", "士"};
 int team1_start[][] = { {8, 2} , {7, 2} , {9, 2} , {5, 2} , {11, 3} , {5, 3} , {11, 2} , {2, 2} , {12, 2} , {3, 2} , {14, 2} , {2, 7} , {5, 7} , {8, 7} , {11, 7} , {14, 7} };
 int team2_start[][] = { {8, 17} ,  {7, 17} , {9, 17} , {5, 16} , {11, 17} , {5, 17} , {11, 16} , {3, 17} , {14, 17} , {2, 17} , {12, 17} , {2, 12} , {5, 12} , {8, 12} , {11, 12} , {14, 12}};
+int hp_start[] = { 2, 2, 1, 3, 2, 2, 2, 2};
+int solder_id[]  = { 11, 12, 13, 14, 15, 27, 28, 29, 30, 31 };
 int piece_start[][][] = { team1_start, team2_start };
 int board[][] = new int[9][11];
 // 王: 8,2 ; 8,17
@@ -32,18 +34,18 @@ void setup(){
     for( int j = 0; j <  piece_start[i].length; j++){
       board[ int(piece_start[i][j][0]*2/3 + 1/2) - 1][ int(piece_start[i][j][1]*2/3 + 1/2) - 1 ] = index;
       if( j == 0 ){
-        piece[index] = set_piece( p_name[n], piece_start[i][j][0], piece_start[i][j][1] , i+1, index);
+        piece[index] = set_piece( p_name[n], piece_start[i][j][0], piece_start[i][j][1] , i+1, index, hp_start[n]);
       }
       else if( j < 11 ){
         s += 1;
         if( s == 2 ){
           s = 0;
         }
-        piece[index] = set_piece( p_name[n+s], piece_start[i][j][0], piece_start[i][j][1] , i+1, index);
+        piece[index] = set_piece( p_name[n+s], piece_start[i][j][0], piece_start[i][j][1] , i+1, index, hp_start[n+s]);
         n = n + s;
       }
       else{
-        piece[index] = set_piece( p_name[n+i+1], piece_start[i][j][0], piece_start[i][j][1] , i+1, index);
+        piece[index] = set_piece( p_name[n+i+1], piece_start[i][j][0], piece_start[i][j][1] , i+1, index, hp_start[n+i+1]);
       }
       index++;
     }
@@ -56,8 +58,8 @@ void setup(){
   //noLoop();
 }
 
-Piece set_piece( String name, int x, int y, int team , int index){
-  Piece p = new Piece( x, y, name, team, index );
+Piece set_piece( String name, int x, int y, int team , int index, int hp){
+  Piece p = new Piece( x, y, name, team, index , hp);
   p.place( int(x*2/3 + 1/2), int(y*2/3 + 1/2) );
   return p;
 }
@@ -71,29 +73,34 @@ void draw(){
     Piece p = piece[ i ]; 
     int rx = int( mouseX / block ), ry = int( mouseY / block );
     int pindex = -1;
-
-    Piece tmp_p = null;
-    if( rx > 0 && rx <= 9 && ry > 0 && ry <= 11 ){
-      pindex = board[ rx - 1 ][ ry - 1 ];
+    if( p.life == true ){
+      Piece tmp_p = null;
+      if( rx > 0 && rx <= 9 && ry > 0 && ry <= 11 ){
+        pindex = board[ rx - 1 ][ ry - 1 ];
+      }
+  
+      if( pindex > -1 ){
+        tmp_p = piece[ pindex ];
+      }
+      
+      int prx = int( p.x / block ), pry = int( p.y / block );
+      int pprx = int( p.px / block ), ppry = int( p.py / block );
+      boolean pfollow = p.follow==true;
+      p.control( mouseX, mouseY, mousePressed, pindex == i ? null : tmp_p );
+  
+      if( !mousePressed && pfollow && p.hover && !p.has_attack){
+        println( prx, pry, pprx, ppry);
+        board[ prx - 1 ][ pry - 1 ] ^= board[ pprx - 1 ][ ppry - 1 ];
+        board[ pprx - 1 ][ ppry - 1 ] ^= board[ prx - 1 ][ pry - 1 ];
+        board[ prx - 1 ][ pry - 1 ] ^= board[ pprx - 1 ][ ppry - 1 ];
+      }
+      
+      p.draw();
     }
-
-    if( pindex > -1 ){
-      tmp_p = piece[ pindex ];
+    else{
+      int prx = int( p.x / block ), pry = int( p.y / block );
+      board[ prx - 1 ][ pry - 1 ] = -1;
     }
-    
-    int prx = int( p.x / block ), pry = int( p.y / block );
-    int pprx = int( p.px / block ), ppry = int( p.py / block );
-    boolean pfollow = p.follow==true;
-    p.control( mouseX, mouseY, mousePressed, pindex == i ? null : tmp_p );
-
-    if( !mousePressed && pfollow && p.hover ){
-      println( prx, pry, pprx, ppry);
-      board[ prx - 1 ][ pry - 1 ] ^= board[ pprx - 1 ][ ppry - 1 ];
-      board[ pprx - 1 ][ ppry - 1 ] ^= board[ prx - 1 ][ pry - 1 ];
-      board[ prx - 1 ][ pry - 1 ] ^= board[ pprx - 1 ][ ppry - 1 ];
-    }
-    
-    p.draw();
   }
   
   
@@ -114,12 +121,12 @@ void draw_board(){
 
 public class Piece{
   int step;
-  int team, id;
+  int team, id, hp;
   float x, y, px, py, // [x, y](currect), [px, py](previous)  
         size;  // piece size, block size
   String name;
-  boolean follow = false, drag = false, hover = false;
-  Piece(int _x, int _y, String _name, int _team, int _id){
+  boolean follow = false, drag = false, hover = false, life = true, has_attack = false;
+  Piece(int _x, int _y, String _name, int _team, int _id, int _hp){
     name = _name;
     //block = 50;
     size = block/3*2;
@@ -130,6 +137,7 @@ public class Piece{
     step = 0;
     team = _team;
     id = _id;
+    hp = _hp;
   }
   
   public void draw(){
@@ -169,9 +177,32 @@ public class Piece{
     }else if( !_drag && follow && hover ){
       follow = false;
       println( tp ); // target piece
-      if ( (!moving_rule( int(tx), int(ty) ) || int( ty / block ) == 6) || tp != null ){
+      //if ( (!moving_rule( int(tx), int(ty) ) || int( ty / block ) == 6) || tp != null ){
+      if ( (tp != null && tp.team == team ) || (!moving_rule( int(tx), int(ty) ) || int( ty / block ) == 6) ){
+        println("can't move", step);
         place( px, py );
-      }else{
+      }
+      else if( moving_rule( int(tx), int(ty))  &&  tp != null && tp.team != team){  //attack
+        print("attack hp-1", tp.hp);
+        has_attack = true;
+        tp.hp -= 1;
+        if ( tp.hp == 0 ){
+          tp.life = false;
+          place( tx, ty );
+        }
+        else{
+          place( px, py );
+        }
+        print(" >> ", tp.hp, tp.life, "\n");
+      }
+      else{
+        println("move", step);
+        for( int i=0; i<solder_id.length; i++ ){
+          if(id == solder_id[i]){
+            step -= 1;
+            break;
+          }
+        }
         place( tx, ty );
       }
     }
@@ -256,6 +287,8 @@ public class Piece{
     }
     if( result == true )
       step ++;
+
+    println("step:", step);
 
     return result;
   }
